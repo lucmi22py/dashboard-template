@@ -1,6 +1,8 @@
 import React from 'react'
 import { Responsive, WidthProvider } from 'react-grid-layout'
 import { BarChart, PieChart, LineChart, Activity } from 'lucide-react'
+import { DashboardCard } from './DashboardCard'
+import { BREAKPOINT_COLS, DEFAULT_LAYOUT } from '../constants/layoutConfig'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
 
@@ -12,48 +14,49 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ layout, onLayoutChange }) => {
+  const generateResponsiveLayout = () => {
+    const responsiveLayout: any = {}
+    Object.keys(BREAKPOINT_COLS).forEach(breakpoint => {
+      // Maintain the same proportions across breakpoints
+      responsiveLayout[breakpoint] = layout.map(item => ({
+        ...item,
+        w: Math.floor((item.w * BREAKPOINT_COLS[breakpoint]) / BREAKPOINT_COLS.lg),
+        x: Math.floor((item.x * BREAKPOINT_COLS[breakpoint]) / BREAKPOINT_COLS.lg),
+      }))
+    })
+    return responsiveLayout
+  }
+
   return (
     <ResponsiveGridLayout
       className="layout"
-      layouts={{ lg: layout }}
+      layouts={generateResponsiveLayout()}
       breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-      cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
+      cols={BREAKPOINT_COLS}
       rowHeight={100}
-      onLayoutChange={onLayoutChange}
+      onLayoutChange={(_, layouts) => onLayoutChange(layouts.lg)}
       isDraggable={true}
       isResizable={true}
-      resizeHandles={['s', 'w', 'e', 'n', 'se']}
+      resizeHandles={['se']}
+      margin={[16, 16]}
+      containerPadding={[16, 16]}
+      useCSSTransforms={true}
+      preventCollision={false}
+      compactType="vertical"
     >
-      <div key="sales" className="bg-white p-6 rounded-lg shadow-md">
-        <DashboardCard title="Sales Overview" icon={<BarChart />} />
+      <div key="sales" className="bg-white rounded-lg shadow-md overflow-hidden">
+        <DashboardCard title="Sales Overview" icon={<BarChart className="w-6 h-6" />} />
       </div>
-      <div key="customers" className="bg-white p-6 rounded-lg shadow-md">
-        <DashboardCard title="Customer Distribution" icon={<PieChart />} />
+      <div key="customers" className="bg-white rounded-lg shadow-md overflow-hidden">
+        <DashboardCard title="Customer Distribution" icon={<PieChart className="w-6 h-6" />} />
       </div>
-      <div key="revenue" className="bg-white p-6 rounded-lg shadow-md">
-        <DashboardCard title="Revenue Trends" icon={<LineChart />} />
+      <div key="revenue" className="bg-white rounded-lg shadow-md overflow-hidden">
+        <DashboardCard title="Revenue Trends" icon={<LineChart className="w-6 h-6" />} />
       </div>
-      <div key="activity" className="bg-white p-6 rounded-lg shadow-md">
-        <DashboardCard title="Activity Log" icon={<Activity />} />
+      <div key="activity" className="bg-white rounded-lg shadow-md overflow-hidden">
+        <DashboardCard title="Activity Log" icon={<Activity className="w-6 h-6" />} />
       </div>
     </ResponsiveGridLayout>
-  )
-}
-
-interface DashboardCardProps {
-  title: string
-  icon: React.ReactNode
-}
-
-const DashboardCard: React.FC<DashboardCardProps> = ({ title, icon }) => {
-  return (
-    <div className="h-full">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold">{title}</h2>
-        <span className="text-gray-500">{icon}</span>
-      </div>
-      <p className="text-gray-600">Content for {title}</p>
-    </div>
   )
 }
 
